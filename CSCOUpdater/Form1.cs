@@ -11,6 +11,8 @@ using System.Net;
 using System.IO;
 using System.IO.Compression;
 
+using System.Reflection;
+
 using CG.Web.MegaApiClient;
 
 namespace CSCOUpdater
@@ -25,6 +27,8 @@ namespace CSCOUpdater
 		bool no_v_file = false;
 
 		bool done = false;
+
+		DialogResult r;
 
 		Task task;
 
@@ -42,28 +46,45 @@ namespace CSCOUpdater
 			{
 				if(!button1.Enabled)
 				{
-
+					if (!File.Exists(Directory.GetCurrentDirectory() + "/csco/version.txt"))
+					{
+						File.WriteAllText(Directory.GetCurrentDirectory() + "/csco/version.txt", "" + latest_version);
+					}
 				}
 				else
 				{
-					button1.Text = "Downloading...";
+						if (r == DialogResult.Yes)
+						{
+							if (no_v_file == true || !File.Exists(Directory.GetCurrentDirectory() + "/csco/version.txt"))
+							{
+								File.WriteAllText(Directory.GetCurrentDirectory() + "/csco/version.txt", "" + latest_version);
+							}
+							done = true;
+							button1.Enabled = false;
+							button1.Text = "Version File Created";
+						}
+						else
+						{
+							button1.Text = "Downloading...";
 
-					delete_dir("./TempDownloadCSCO");
+							delete_dir(Directory.GetCurrentDirectory() + "/TempDownloadCSCO");
 
-					Directory.CreateDirectory("./TempDownloadCSCO");
+							Directory.CreateDirectory(Directory.GetCurrentDirectory() + "/TempDownloadCSCO");
 
-					MegaApiClient mega_client = new MegaApiClient();
-					mega_client.LoginAnonymous();
+							MegaApiClient mega_client = new MegaApiClient();
+							mega_client.LoginAnonymous();
 
-					try
-					{
-						task = mega_client.DownloadFileAsync(new Uri(latest_url), "./TempDownloadCSCO/temp.zip", progress);
-					}
-					catch(Exception ee)
-					{
-						MessageBox.Show("Couldn't Download: " + ee.Message);
-						done = true;
-					}
+							try
+							{
+								task = mega_client.DownloadFileAsync(new Uri(latest_url), 
+									Directory.GetCurrentDirectory() + "/TempDownloadCSCO/temp.zip", progress);
+							}
+							catch (Exception ee)
+							{
+								MessageBox.Show("Couldn't Download: " + ee.Message);
+								done = true;
+							}
+						}
 				}
 			}
 			else
@@ -80,13 +101,13 @@ namespace CSCOUpdater
 
 		private void Form1_Load(object sender, EventArgs e)
 		{
+
 			string v_file = "NULL";
 			string local_v_file = "NULL";
 
-			if (Directory.GetParent("./").Name == "sourcemods")
+			if (Directory.GetParent(System.Reflection.Assembly.GetEntryAssembly().Location).Name.ToLower() == "sourcemods")
 			{
-
-
+			
 				button1.Text = "Getting version file";
 				button1.Enabled = false;
 
@@ -94,6 +115,7 @@ namespace CSCOUpdater
 
 				try
 				{
+					//Get the version file from github
 					using (System.Net.WebClient client = new System.Net.WebClient())
 					{
 						v_file = client.DownloadString(v_url);
@@ -106,11 +128,14 @@ namespace CSCOUpdater
 
 				if(v_file != "NULL")
 				{
+					//If we get the file then continue downloading...
+
 					//Process v_file
 					latest_version = 0;
 
 					string buff = "";
 
+					//Find number
 					foreach(char c in v_file)
 					{
 						if (c == ' ')
@@ -129,6 +154,7 @@ namespace CSCOUpdater
 
 					bool reading = false;
 
+					//Find URL
 					foreach (char c in v_file)
 					{
 						if (!reading)
@@ -147,7 +173,7 @@ namespace CSCOUpdater
 					latest_url = buff;
 				}
 
-				if (!Directory.Exists("./csco"))
+				if (!Directory.Exists("csco"))
 				{
 					MessageBox.Show("No CS:CO installation found. Updating will download last version!");
 				}
@@ -157,13 +183,15 @@ namespace CSCOUpdater
 					try
 					{
 						// Get actual installed version
-						local_v_file = File.ReadAllText("./csco/version.txt");
+						local_v_file = File.ReadAllText(Directory.GetCurrentDirectory() + "/csco/version.txt");
 						installed_version = Convert.ToInt32(local_v_file);
 					}
 					catch (Exception)
 					{
 
-						MessageBox.Show("Couldn't get version.txt, assuming old version installed. Updating will download and create version.txt");
+						r = MessageBox.Show("Couldn't get version.txt. Do you have the latest version?", 
+							"Error", MessageBoxButtons.YesNo);
+						
 						no_v_file = true;
 					}
 				}
@@ -173,11 +201,14 @@ namespace CSCOUpdater
 				MessageBox.Show("You are running the autoupdater from the wrong location. Can't update!");
 			}
 
+			//Show labels
 			installed_v.Text = "Installed version: " + installed_version;
 			latest_v.Text = "Latest version: " + latest_version;
 
+			//Check if the download URL is available
 			if (latest_url != "")
 			{
+				//Check if we need to update
 				if(installed_version < latest_version)
 				{
 					button1.Text = "Update";
@@ -202,6 +233,8 @@ namespace CSCOUpdater
 		{
 			progressBar1.Maximum = 100;
 
+			//Directory.SetCurrentDirectory(System.Reflection.Assembly.GetExecutingAssembly().Location);
+
 			try
 			{
 				if (task != null)
@@ -210,27 +243,32 @@ namespace CSCOUpdater
 					{
 						if (!done)
 						{
+							// The button was clicked and download successful
 							done = true;
 							progressBar1.Value = 100;
 
 							button1.Text = "Deleting Old Install...";
 
-							if (File.Exists("./HostMe.txt"))
+
+							//Delete readme files
+							if (File.Exists(Directory.GetCurrentDirectory() + "/HostMe.txt"))
 							{
-								File.Delete("./HostMe.txt");
+								File.Delete(Directory.GetCurrentDirectory() + "/HostMe.txt");
 							}
-							if (File.Exists("./ReadMe.txt"))
+							if (File.Exists(Directory.GetCurrentDirectory() + "/ReadMe.txt"))
 							{
-								File.Delete("./ReadMe.txt");
+								File.Delete(Directory.GetCurrentDirectory() + "/ReadMe.txt");
 							}
 
-							delete_dir("./csco");
+							delete_dir(Directory.GetCurrentDirectory() + "/csco");
 							button1.Text = "Installing...";
 
+							//Extract the downloaded .zip
 							try
 							{
 								// Extract .zip
-								ZipFile.ExtractToDirectory("./TempDownloadCSCO/temp.zip", "./");
+								ZipFile.ExtractToDirectory(Directory.GetCurrentDirectory() + "/TempDownloadCSCO/temp.zip",
+									Directory.GetCurrentDirectory() + "/");
 							}
 							catch (Exception ee)
 							{
@@ -238,13 +276,14 @@ namespace CSCOUpdater
 								done = true;
 							}
 
-							if (no_v_file == true || !File.Exists("./csco/version.txt"))
+							//If version.txt file is not included (ZooL will include it soon) create one
+							if (no_v_file == true || !File.Exists("csco/version.txt"))
 							{
-								File.WriteAllText("./csco/version.txt", "" + latest_version);
+								File.WriteAllText(Directory.GetCurrentDirectory() + "/csco/version.txt", "" + latest_version);
 							}
 
 							// Delete temp files
-							delete_dir("./TempDownloadCSCO");
+							delete_dir("TempDownloadCSCO");
 
 
 							button1.Enabled = false;

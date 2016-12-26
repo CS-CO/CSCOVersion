@@ -39,9 +39,9 @@
 			// 
 			// button1
 			// 
-			this.button1.Location = new System.Drawing.Point(12, 46);
+			this.button1.Location = new System.Drawing.Point(12, 60);
 			this.button1.Name = "button1";
-			this.button1.Size = new System.Drawing.Size(313, 51);
+			this.button1.Size = new System.Drawing.Size(312, 51);
 			this.button1.TabIndex = 0;
 			this.button1.Text = "Update";
 			this.button1.UseVisualStyleBackColor = true;
@@ -68,9 +68,9 @@
 			// 
 			// progressBar1
 			// 
-			this.progressBar1.Location = new System.Drawing.Point(15, 103);
+			this.progressBar1.Location = new System.Drawing.Point(15, 117);
 			this.progressBar1.Name = "progressBar1";
-			this.progressBar1.Size = new System.Drawing.Size(310, 23);
+			this.progressBar1.Size = new System.Drawing.Size(309, 23);
 			this.progressBar1.TabIndex = 3;
 			// 
 			// timer1
@@ -83,7 +83,7 @@
 			// 
 			this.label1.AutoSize = true;
 			this.label1.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
-			this.label1.Location = new System.Drawing.Point(12, 129);
+			this.label1.Location = new System.Drawing.Point(12, 143);
 			this.label1.Name = "label1";
 			this.label1.Size = new System.Drawing.Size(298, 17);
 			this.label1.TabIndex = 4;
@@ -94,7 +94,7 @@
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(330, 155);
+			this.ClientSize = new System.Drawing.Size(336, 169);
 			this.Controls.Add(this.label1);
 			this.Controls.Add(this.progressBar1);
 			this.Controls.Add(this.latest_v);
